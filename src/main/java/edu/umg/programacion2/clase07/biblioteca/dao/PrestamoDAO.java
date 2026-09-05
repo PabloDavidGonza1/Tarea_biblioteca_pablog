@@ -96,8 +96,30 @@ public class PrestamoDAO {
      * 4. Agregalo a una List<PrestamoDetalle> y devuelvela al final.
      */
     public List<PrestamoDetalle> listarPrestamosActivosConLibro() throws SQLException {
+
         List<PrestamoDetalle> resultado = new ArrayList<>();
-        // TODO: ejecutar la consulta con JOIN descrita arriba y llenar "resultado".
+
+        String sql = "SELECT p.nombre_estudiante, p.fecha_prestamo, l.titulo " +
+                     "FROM prestamos p " +
+                     "JOIN libros l ON p.libro_id = l.id " +
+                     "WHERE p.fecha_devolucion IS NULL " +
+                     "ORDER BY p.fecha_prestamo";
+
+        try (Connection conexion = DriverManager.getConnection(URL, USUARIO, PASSWORD);
+             PreparedStatement statement = conexion.prepareStatement(sql);
+             ResultSet resultadoConsulta = statement.executeQuery()) {
+
+            while (resultadoConsulta.next()) {
+
+                PrestamoDetalle detalle = new PrestamoDetalle(
+                    resultadoConsulta.getString("titulo"),
+                    resultadoConsulta.getString("nombre_estudiante"),
+                    resultadoConsulta.getDate("fecha_prestamo").toLocalDate()
+                );
+
+                resultado.add(detalle);
+            }
+        }
 
         return resultado;
     }
